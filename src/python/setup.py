@@ -64,4 +64,10 @@ setup(
           'Intended Audience :: Academic Usage',
           'Programming Language :: Python',
           ],
+    entry_points={
+    'console_scripts': [
+        "parallel_launcher = launch_job.parallel_launcher:run_cli",
+        'acrobot_dqn = experiments.acrobot.DQN:run_cli',
+    ],
+    },
 )

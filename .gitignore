@@ -21,3 +21,8 @@ test/acrobot.urdf
 test/pendubot.urdf
 leaderboard/simulation/acrobot/data/*
 leaderboard/robustness/acrobot/data/*
+eigen*
+Eigen.zip
+env/*
+src/python/experiments/acrobot/figures/*
+src/python/out/*
