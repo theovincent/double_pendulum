@@ -34,7 +34,7 @@ class BaseQ:
 
         if learning_rate is not None:
             self.learning_rate = learning_rate
-            self.optimizer = optax.adam(self.learning_rate, eps=1.5e-4)
+            self.optimizer = optax.adam(self.learning_rate)
             self.optimizer_state = self.optimizer.init(self.params)
 
     @partial(jax.jit, static_argnames="self")
@@ -151,17 +151,9 @@ class DQN(BaseSingleQ):
         return self.metric(error, ord="2")
 
     @partial(jax.jit, static_argnames="self")
-    def bellman_error(self, params: FrozenDict, params_target: FrozenDict, samples: FrozenDict) -> jnp.float32:
-        targets = self.compute_target(params_target, samples)
-        predictions = self(params, samples["state"])[jnp.arange(samples["state"].shape[0]), samples["action"]]
-
-        error = predictions - targets
-        return self.metric(error, ord="sum")
-
-    @partial(jax.jit, static_argnames="self")
     def best_action(self, key: jax.random.PRNGKey, q_params: FrozenDict, state: jnp.ndarray) -> jnp.int8:
         # key is not used here
-        return jnp.argmax(self(q_params, jnp.array(state, dtype=jnp.float32))[0]).astype(jnp.int8)
+        return jnp.argmax(self(q_params, jnp.array(state, dtype=jnp.float32))).astype(jnp.int8)
 
     def update_target_params(self, step: int) -> None:
         if step % self.n_training_steps_per_target_update == 0:

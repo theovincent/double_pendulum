@@ -12,16 +12,14 @@ def run_cli(argvs=sys.argv[1:]):
 
     warnings.simplefilter(action="ignore", category=FutureWarning)
 
-    parser = argparse.ArgumentParser("Train DQN on Acrobot.")
+    parser = argparse.ArgumentParser("Train DQN on Pendubot.")
     addparse(parser)
     args = parser.parse_args(argvs)
-    print_info(args.experiment_name, "DQN", "Acrobot", args.seed)
-    p = json.load(
-        open(f"experiments/acrobot/figures/{args.experiment_name}/parameters.json")
-    )  # p for parameters
+    print_info(args.experiment_name, "DQN", "Pendubot", args.seed)
+    p = json.load(open(f"experiments/pendubot/figures/{args.experiment_name}/parameters.json"))  # p for parameters
 
-    from experiments.acrobot.utils import generate_keys
-    from dqn.environments.double_pendulum import AcrobotEnv
+    from experiments.pendubot.utils import generate_keys
+    from dqn.environments.double_pendulum import PendubotEnv
     from dqn.environments import mpar, dt, integrator, x0, goal
     from dqn.sample_collection.replay_buffer import ReplayBuffer
     from dqn.networks.q_architectures import DoublePendulumDQN
@@ -29,7 +27,7 @@ def run_cli(argvs=sys.argv[1:]):
 
     q_key, train_key = generate_keys(args.seed)
 
-    env = AcrobotEnv(mpar, dt, integrator, x0, goal, p["n_actions"])
+    env = PendubotEnv(mpar, dt, p["n_repeated_actions"], integrator, x0, goal, p["n_actions"])
 
     replay_buffer = ReplayBuffer(
         p["replay_buffer_size"],
@@ -50,4 +48,4 @@ def run_cli(argvs=sys.argv[1:]):
         p["dqn_n_training_steps_per_target_update"],
     )
 
-    train(train_key, "acrobot", args, p, q, env, replay_buffer)
+    train(train_key, "pendubot", args, p, q, env, replay_buffer)

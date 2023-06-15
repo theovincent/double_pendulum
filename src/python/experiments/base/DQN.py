@@ -7,7 +7,7 @@ from argparse import Namespace
 from dqn.sample_collection.exploration import EpsilonGreedySchedule
 from dqn.sample_collection.replay_buffer import ReplayBuffer
 from dqn.networks.base_q import BaseQ
-from dqn.environments.double_pendulum import AcrobotEnv
+from dqn.environments.double_pendulum import PendubotEnv
 
 
 def train(
@@ -16,23 +16,15 @@ def train(
     args: Namespace,
     p: dict,
     q: BaseQ,
-    env: AcrobotEnv,
+    env: PendubotEnv,
     replay_buffer: ReplayBuffer,
 ) -> None:
-    # if DQN
-    if args.bellman_iterations_scope is None:
-        experiment_path = f"experiments/{environment_name}/figures/{args.experiment_name}/DQN/"
-    else:
-        experiment_path = (
-            f"experiments/{environment_name}/figures/{args.experiment_name}/iDQN/{args.bellman_iterations_scope}_"
-        )
+    experiment_path = f"experiments/{environment_name}/figures/{args.experiment_name}/DQN/"
 
     sample_key, exploration_key = jax.random.split(key)
     n_training_steps = 0
     losses = np.zeros((p["n_epochs"], p["n_training_steps_per_epoch"])) * np.nan
     js = np.zeros(p["n_epochs"]) * np.nan
-    stds = np.zeros(p["n_epochs"]) * np.nan
-    approximation_errors = np.zeros(p["n_epochs"]) * np.nan
     max_j = -float("inf")
     argmax_j = None
 
@@ -83,16 +75,3 @@ def train(
             argmax_j = idx_epoch
             max_j = js[idx_epoch]
             q.save(f"{experiment_path}Q_{args.seed}_{argmax_j}_best", online_params_only=True)
-
-        if args.bellman_iterations_scope is not None and p.get("compute_head_std", False):
-            stds[idx_epoch] = q.compute_standard_deviation_head(replay_buffer, key)
-            np.save(
-                f"{experiment_path}S_{args.seed}.npy",
-                stds,
-            )
-        if args.bellman_iterations_scope is not None and p.get("compute_approximation_error", False):
-            approximation_errors[idx_epoch] = q.compute_approximation_error(replay_buffer, key)
-            np.save(
-                f"{experiment_path}A_{args.seed}.npy",
-                approximation_errors,
-            )

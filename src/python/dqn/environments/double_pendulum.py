@@ -10,30 +10,23 @@ from dqn.sample_collection.exploration import EpsilonGreedySchedule
 from dqn.sample_collection.replay_buffer import ReplayBuffer
 
 
-class AcrobotEnv:
-    def __init__(self, mpar, dt, integrator, x0, goal, n_actions):
+class PendubotEnv:
+    def __init__(self, mpar, dt, n_repeated_actions, integrator, x0, goal, n_actions):
         plant = SymbolicDoublePendulum(model_pars=mpar)
         self.simulator = Simulator(plant)
         self.dt = dt
+        self.n_repeated_actions = n_repeated_actions
         self.integrator = integrator
         self.x0 = x0
         self.goal = goal
-        
-        sCu = [1.0, 1.0]
-        sCp = [1.0, 1.0]
-        sCv = [0.01, 0.01]
-        self.Q = np.array(
-            [
-                [sCp[0], 0.0, 0.0, 0.0],
-                [0.0, sCp[1], 0.0, 0.0],
-                [0.0, 0.0, sCv[0], 0.0],
-                [0.0, 0.0, 0.0, sCv[1]],
-            ]
-        )
-        self.R = np.array([[sCu[0], 0.0], [0.0, sCu[1]]])
         self.n_actions = n_actions
-        # change 1 to 0 for pendulum
-        self.actions = np.linspace(-plant.torque_limit[1], plant.torque_limit[1], self.n_actions)
+        assert self.n_actions % 2 == 1
+        self.actions = (
+            np.concatenate(
+                (-np.logspace(-2, 0, self.n_actions // 2)[::-1], np.array([0]), np.logspace(-2, 0, self.n_actions // 2))
+            )
+            * 6
+        )
 
     def reset(self):
         self.simulator.set_state(0, self.x0)
@@ -43,38 +36,50 @@ class AcrobotEnv:
         self.n_steps = 0
 
         x_meas = self.simulator.get_measurement(self.dt)
-        self.state = self.simulator.filter_measurement(x_meas)
+        x_filt = self.simulator.filter_measurement(x_meas)
+        self.state = np.array(
+            [
+                np.cos(x_filt[0]),
+                np.sin(x_filt[0]),
+                np.cos(x_filt[1]),
+                np.sin(x_filt[1]),
+                x_filt[2],
+                x_filt[3],
+            ]
+        )
 
         return self.state
 
     def step(self, idx_action):
-        # exchange indexes for pendulum
-        u = np.array([0, self.actions[idx_action]])
-        nu = self.simulator.get_real_applied_u(u)
+        reward = 0
 
-        self.simulator.step(nu, self.dt, integrator=self.integrator)
+        for _ in range(self.n_repeated_actions):
+            u = np.array([self.actions[idx_action], 0])
+            nu = self.simulator.get_real_applied_u(u)
+
+            self.simulator.step(nu, self.dt, integrator=self.integrator)
+            x_meas = self.simulator.get_measurement(self.dt)
+            x_filt = self.simulator.filter_measurement(x_meas)
+            self.state = np.array(
+                [
+                    np.cos(x_filt[0]),
+                    np.sin(x_filt[0]),
+                    np.cos(x_filt[1]),
+                    np.sin(x_filt[1]),
+                    x_filt[2],
+                    x_filt[3],
+                ]
+            )
+
+            diff_to_goal = self.state[:4] - np.array([-1, 0, 1, 0])
+            reward += np.exp(-diff_to_goal @ np.diag([1, 1, 1 / 3, 1 / 3]) @ diff_to_goal.T) * (self.state[0] < -0.2)
+
         self.n_steps += 1
-        x_meas = self.simulator.get_measurement(self.dt)
-        self.state = self.simulator.filter_measurement(x_meas)
 
-        x_diff = self.state - self.goal
+        return self.state, reward / self.n_repeated_actions, False, {}
 
-        cost = x_diff @ self.Q @ x_diff.T + nu @ self.R @ nu.T
-
-        return self.state, -cost, False, {}
-    
-    def simulate(self, N, agent):
-        self.reset()
-        sum_reward = 0
-
-        while self.n_steps < N:
-            idx_action = agent.act(self.x_filt)
-            _, reward, _, _ = self.step(idx_action)
-            sum_reward += reward
-        
-        return sum_reward
-    
-    def collect_random_samples(self, sample_key: jax.random.PRNGKeyArray, replay_buffer: ReplayBuffer, n_samples: int, horizon: int
+    def collect_random_samples(
+        self, sample_key: jax.random.PRNGKeyArray, replay_buffer: ReplayBuffer, n_samples: int, horizon: int
     ) -> None:
         self.reset()
 
@@ -110,9 +115,8 @@ class AcrobotEnv:
 
         replay_buffer.add(state, action, reward, next_state, absorbing)
 
-        if self.n_steps >= horizon:
+        if absorbing or self.n_steps >= horizon:
             self.reset()
             has_reset = True
 
-        return reward, has_reset
-
+        return reward, has_reset or absorbing

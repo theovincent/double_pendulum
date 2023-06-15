@@ -1,0 +1,25 @@
+{
+    "---- Shared parameters ---": "----------------",
+    "gamma": 0.99,
+    "replay_buffer_size": 40000,
+    "n_initial_samples": 5000,
+    "n_epochs": 100,
+    "n_training_steps_per_epoch": 20000,
+    "n_training_steps_per_online_update": 1,
+    "horizon": 200,
+    "n_repeated_actions": 5,
+    "starting_eps": 1,
+    "ending_eps": 0.001,
+    "duration_eps": 3000,
+    "batch_size": 128,
+    "n_actions": 7,
+    "layers_dimensions": [
+        512,
+        512,
+        50,
+        50
+    ],
+    "---- DQNs ---": "-----------------------------",
+    "dqn_learning_rate": 0.001,
+    "dqn_n_training_steps_per_target_update": 500
+}

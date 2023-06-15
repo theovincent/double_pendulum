@@ -1,23 +1,22 @@
 {
     "---- Shared parameters ---": "----------------",
     "gamma": 0.99,
-    "replay_buffer_size": 1000000,
-    "n_initial_samples": 20000,
-    "n_epochs": 200,
-    "n_training_steps_per_epoch": 250000,
-    "n_training_steps_per_online_update": 4,
-    "horizon": 5000,
+    "replay_buffer_size": 8000,
+    "n_initial_samples": 500,
+    "n_epochs": 100,
+    "n_training_steps_per_epoch": 1000,
+    "n_training_steps_per_online_update": 1,
+    "horizon": 1000,
     "starting_eps": 1,
     "ending_eps": 0.01,
-    "duration_eps": 250000,
-    "batch_size": 256,
-    "---- iDQNs ---": "----------------------------",
-    "idqn_learning_rate": 6.25e-5,
-    "idqn_n_training_steps_per_target_update": 30,
-    "idqn_n_training_steps_per_head_update": 6000,
-    "idqn_importance_iteration": "uniform",
-    "idqn_head_behaviorial_policy": "uniform",
+    "duration_eps": 10000,
+    "batch_size": 128,
+    "n_actions": 11,
+    "layers_dimensions": [
+        1024,
+        512
+    ],
     "---- DQNs ---": "-----------------------------",
-    "dqn_learning_rate": 1e-5,
-    "dqn_n_training_steps_per_target_update": 8000
+    "dqn_learning_rate": 0.001,
+    "dqn_n_training_steps_per_target_update": 10000
 }
