@@ -28,5 +28,10 @@ Eigen.zip
 env/*
 src/python/experiments/acrobot/figures/*
 src/python/experiments/pendubot/figures/*
+!src/python/experiments/pendubot/figures/first*
+src/python/experiments/pendubot/figures/first/*
+!src/python/experiments/pendubot/figures/first/DQN*
+src/python/experiments/pendubot/figures/first/DQN/*
+!src/python/experiments/pendubot/figures/first/DQN/Q_10_86_best_online_params
 src/python/out/*
 .vscode/
