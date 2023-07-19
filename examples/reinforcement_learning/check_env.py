@@ -1,8 +1,9 @@
 import os
 import numpy as np
 
-import gym
-from stable_baselines3.common.env_checker import check_env
+import gymnasium as gym
+from gymnasium.utils.env_checker import check_env as gymnasium_check_env
+from stable_baselines3.common.env_checker import check_env as sb3_check_env
 from stable_baselines3.common.env_util import make_vec_env
 
 from double_pendulum.model.symbolic_plant import SymbolicDoublePendulum
@@ -70,22 +71,8 @@ def reward_func(observation, action):
     )
 
 
-class terminated_func:
-    def __init__(self, max_steps=100):
-        self.max_steps = max_steps
-        self.counter = 0
-
-    def __call__(self, observation):
-        self.counter += 1
-        if self.counter < self.max_steps:
-            done = False
-        else:
-            done = True
-            self.counter = 0
-        return done
-
-
-tf = terminated_func(max_steps)
+def terminated_func(observation):
+    return False
 
 
 def noisy_reset_func():
@@ -98,26 +85,32 @@ def noisy_reset_func():
 env = CustomEnv(
     dynamics_func=dynamics_func,
     reward_func=reward_func,
-    terminated_func=tf,
+    terminated_func=terminated_func,
     reset_func=noisy_reset_func,
     obs_space=obs_space,
     act_space=act_space,
+    max_episode_steps=100,
 )
 
 # stable baselines check
-check_env(env)
+sb3_check_env(env)
 print("StableBaselines3 env_check successful.")
 
-# vectorized environment
+# gymnasium env check
+gymnasium_check_env(env, skip_render_check=True)
+print("Gymnasium env_check successful.")
+
+# # vectorized environment
 # envs = make_vec_env(
 #     env_id=CustomEnv,
 #     n_envs=3,
-#     env_kwargs={"dynamics_func": dynamics_func,
-#                 "reward_func": reward_func,
-#                 "terminated_func": tf,
-#                 "reset_func": noisy_reset_func,
-#                 "obs_space": obs_space,
-#                 "act_space": act_space},
+#     env_kwargs={
+#         "dynamics_func": dynamics_func,
+#         "reward_func": reward_func,
+#         "terminated_func": terminated_func,
+#         "reset_func": noisy_reset_func,
+#         "obs_space": obs_space,
+#         "act_space": act_space,
+#         "max_episode_steps": max_steps,
+#     },
 # )
-
-#check_env(envs)

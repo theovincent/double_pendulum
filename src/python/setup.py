@@ -20,28 +20,12 @@ setup(
         "moteus",
         "inputs",
         "tabulate",
-        # 'bitstring',
-        # 'pyyaml',
-        # 'argparse',
+        "filterpy",
+        "dill",
+        "argparse",
+        "opencv-python",
         # c++ python bindings
-        "cython",
-        # # optimal control
-        # 'drake',
-        # 'meshcat',
-        # 'IPython',
-        # 'filterpy',
-        # # 'crocoddyl',
-        # # reinforcement learning
-        # 'tensorflow>=2.6.0',
-        # 'pickle5',
-        # 'stable_baselines3'
-        # # documentation
-        # 'sphinx',
-        # 'sphinx-rtd-theme',
-        # 'numpydoc',
-        # # testing
-        # 'pytest',
-        # 'lark',
+        "cython==0.29.36",
     ],
     extras_require={
         "all": [
@@ -52,13 +36,14 @@ setup(
             "lark",
             "drake",
             "meshcat",
-            "gym==0.21",
+            "gymnasium",
             "stable_baselines3",
+            "shimmy",
         ],
         "doc": ["sphinx", "sphinx-rtd-theme", "numpydoc"],
         "test": ["pytest", "lark"],
         "OC": ["drake", "meshcat"],
-        "RL": ["gym==0.21", "stable_baselines3"],
+        "RL": ["gymnasium", "stable_baselines3", "shimmy"],
     },
     classifiers=[
         "Development Status :: 5 - Stable",
