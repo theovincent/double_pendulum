@@ -23,6 +23,8 @@ leaderboard/simulation/acrobot/data/*
 leaderboard/simulation/pendubot/data/*
 leaderboard/robustness/acrobot/data/*
 leaderboard/robustness/pendubot/data/*
+examples/reinforcement_learning/DQN/lqr_data/
+examples/reinforcement_learning/DQN/experiments/
 eigen*
 Eigen.zip
 env/*
