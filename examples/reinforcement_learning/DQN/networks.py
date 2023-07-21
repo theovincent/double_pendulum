@@ -19,7 +19,6 @@ class BaseQ:
         network: nn.Module,
         network_key: jax.random.PRNGKeyArray,
         learning_rate: float,
-        epsilon_optimizer: float,
         n_training_steps_per_online_update: int,
     ) -> None:
         self.n_actions = n_actions
@@ -33,7 +32,7 @@ class BaseQ:
         self.loss_and_grad = jax.jit(jax.value_and_grad(self.loss))
 
         if learning_rate is not None:
-            self.optimizer = optax.adam(learning_rate, eps=epsilon_optimizer)
+            self.optimizer = optax.adam(learning_rate)
             self.optimizer_state = self.optimizer.init(self.params)
 
     def compute_target(self, params: FrozenDict, samples: FrozenDict) -> jnp.ndarray:
@@ -102,7 +101,6 @@ class DQN(BaseQ):
         layers: Sequence[int],
         network_key: jax.random.PRNGKeyArray,
         learning_rate: float,
-        epsilon_optimizer: float,
         n_training_steps_per_online_update: int,
         n_training_steps_per_target_update: int,
     ) -> None:
@@ -110,10 +108,9 @@ class DQN(BaseQ):
             {"state": jnp.zeros(state_shape, dtype=jnp.float32)},
             n_actions,
             gamma,
-            MLP(layers),
+            MLP(layers + [n_actions]),
             network_key,
             learning_rate,
-            epsilon_optimizer,
             n_training_steps_per_online_update,
         )
         self.n_training_steps_per_target_update = n_training_steps_per_target_update
@@ -143,7 +140,8 @@ class DQN(BaseQ):
     @partial(jax.jit, static_argnames="self")
     def best_action(self, params: FrozenDict, state: jnp.ndarray, key: jax.random.PRNGKey) -> jnp.int8:
         # key is not used here
-        return jnp.argmax(self.apply(params, jnp.array(state, dtype=jnp.float32))[0]).astype(jnp.int8)
+        print(self.apply(params, jnp.array(state, dtype=jnp.float32)).shape)
+        return jnp.argmax(self.apply(params, jnp.array(state, dtype=jnp.float32))).astype(jnp.int8)
 
     def update_target_params(self, step: int) -> None:
         if step % self.n_training_steps_per_target_update == 0:
@@ -155,7 +153,7 @@ class MLP(nn.Module):
 
     @nn.compact
     def __call__(self, state):
-        x = jnp.atleast_2d(state)
+        x = state
         for feat in self.features[:-1]:
             x = nn.relu(nn.Dense(feat)(x))
         x = nn.Dense(self.features[-1])(x)

@@ -9,6 +9,7 @@ from exploration import EpsilonGreedySchedule
 from replay_buffer import ReplayBuffer
 from networks import DQN
 from environment import get_environment
+from simulate import simulate
 
 
 def train(argvs=sys.argv[1:]) -> None:
@@ -40,7 +41,6 @@ def train(argvs=sys.argv[1:]) -> None:
         p["layers"],
         q_key,
         p["learning_rate"],
-        p["optimizer_eps"],
         p["n_training_steps_per_online_update"],
         p["n_training_steps_per_target_update"],
     )
@@ -90,6 +90,8 @@ def train(argvs=sys.argv[1:]) -> None:
             argmax_j = idx_epoch
             max_j = js[idx_epoch]
             q.save(f"{experiment_path}Q_{p['seed']}_{argmax_j}_best")
+
+    simulate(experiment_path)
 
 
 if __name__ == "__main__":

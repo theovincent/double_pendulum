@@ -20,8 +20,8 @@ from double_pendulum.utils.wrap_angles import wrap_angles_diff
 
 
 # define robot variation
-robot = "acrobot"
-# robot = "pendubot"
+# robot = "acrobot"
+robot = "pendubot"
 
 # model parameter
 if robot == "pendubot":
@@ -254,7 +254,7 @@ class Env(CustomEnv):
 
 def get_environment(n_actions: int):
     return Env(
-        np.linspace(-1, 1, n_actions),
+        np.hstack((-np.logspace(-1, 0, n_actions // 2)[::-1], np.zeros(1), np.logspace(-1, 0, n_actions // 2))),
         dynamics_func,
         reward_func,
         terminated_func,
