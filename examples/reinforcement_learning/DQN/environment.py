@@ -194,6 +194,7 @@ class Env(CustomEnv):
             act_space,
             max_episode_steps,
         )
+        self.actions = actions
         self.n_actions = len(actions)
 
     def step(self, action):
@@ -254,7 +255,7 @@ class Env(CustomEnv):
 
 def get_environment(n_actions: int):
     return Env(
-        np.hstack((-np.logspace(-1, 0, n_actions // 2)[::-1], np.zeros(1), np.logspace(-1, 0, n_actions // 2))),
+        np.hstack((-np.logspace(-1, -0.25, n_actions // 2)[::-1], np.zeros(1), np.logspace(-1, -0.25, n_actions // 2))),
         dynamics_func,
         reward_func,
         terminated_func,

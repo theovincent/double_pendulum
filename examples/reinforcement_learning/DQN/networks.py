@@ -140,7 +140,6 @@ class DQN(BaseQ):
     @partial(jax.jit, static_argnames="self")
     def best_action(self, params: FrozenDict, state: jnp.ndarray, key: jax.random.PRNGKey) -> jnp.int8:
         # key is not used here
-        print(self.apply(params, jnp.array(state, dtype=jnp.float32)).shape)
         return jnp.argmax(self.apply(params, jnp.array(state, dtype=jnp.float32))).astype(jnp.int8)
 
     def update_target_params(self, step: int) -> None:

@@ -91,7 +91,7 @@ def train(argvs=sys.argv[1:]) -> None:
             max_j = js[idx_epoch]
             q.save(f"{experiment_path}Q_{p['seed']}_{argmax_j}_best")
 
-    simulate(experiment_path)
+    simulate(experiment_path, env.actions)
 
 
 if __name__ == "__main__":

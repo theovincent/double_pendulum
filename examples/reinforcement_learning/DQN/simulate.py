@@ -21,7 +21,7 @@ from double_pendulum.simulation.gym_env import (
 )
 
 
-def simulate(experiment_path):
+def simulate(experiment_path, actions):
     # hyperparameters
     friction_compensation = True
     stabilization = "lqr"
@@ -84,7 +84,7 @@ def simulate(experiment_path):
         # print(x)
         xdiff = x - np.array([np.pi, 0.0, 0.0, 0.0])
         rad = np.einsum("i,ij,j", xdiff, S, xdiff)
-        print(rad, rho)
+        # print(rad, rho)
         return rad < 1.0 * rho, rad
 
     def condition2(t, x):
@@ -93,11 +93,11 @@ def simulate(experiment_path):
         # y = wrap_angles_top()
         # print("y=",y)
         flag, rad = check_if_state_in_roa(S, rho, y)
-        print(rad, rho)
+        # print(rad, rho)
         if flag:
-            print(t)
-            print(y)
-            print(flag)
+            # print(t)
+            # print(y)
+            # print(flag)
             return flag
         return flag
 
@@ -113,6 +113,7 @@ def simulate(experiment_path):
     # initialize sac controller
     controller1 = DQNController(
         experiment_path,
+        actions,
         dynamics_func=dynamics_func,
         dt=dt,
     )
