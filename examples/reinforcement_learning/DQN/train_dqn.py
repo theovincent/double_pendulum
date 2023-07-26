@@ -5,11 +5,11 @@ from tqdm import tqdm
 import numpy as np
 import jax
 
-from exploration import EpsilonGreedySchedule
-from replay_buffer import ReplayBuffer
-from networks import DQN
-from environment import get_environment
-from simulate import simulate
+from double_pendulum.controller.DQN.exploration import EpsilonGreedySchedule
+from double_pendulum.controller.DQN.replay_buffer import ReplayBuffer
+from double_pendulum.controller.DQN.networks import DQN
+from double_pendulum.controller.DQN.environment import get_environment
+from double_pendulum.controller.DQN.simulate import simulate
 
 
 def train(argvs=sys.argv[1:]) -> None:
